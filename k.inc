@@ -16,6 +16,13 @@ class K {
   public function k($s) {
     if(func_num_args()===1){$x=self::enc(1,$s);}else{$x=self::enc(1,func_get_args());}
     fwrite($this->h,$x);
+    return $this->kr();
+  }
+  public function ka($s) {
+    if(func_num_args()===1){$x=self::enc(1,$s);}else{$x=self::enc(1,func_get_args());}
+    fwrite($this->h,$x);
+  }
+  public function kr() {
     $a=unpack("V2", fread($this->h,8));
     $x=fread($this->h,$a[2]-8).pack('VVVV',0,0,0,0);// arthur doesn't pad
     $h=fopen("php://memory", "r+b"); fwrite($h,$x); rewind($h); $o=self::dec($h); fclose($h);
