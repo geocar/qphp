@@ -1,5 +1,5 @@
 <?php
-
+class KException extends Exception {};
 class K {
   private $h;
 
@@ -33,6 +33,10 @@ class K {
     $s = pack("c", -11) . $x . pack("c", 0);
     return (object)array("s" => $s);
   }
+  private static function aa($x) {
+    $n=min(100,count($x));for($i=0;$i<$n;++$i)if(!isset($x[$i]))return true;
+    return false;
+  }
 
   private static function e1($x) {
     if(is_null($x)){return pack("cc",101,0);}
@@ -40,9 +44,16 @@ class K {
     if($x === false){return pack("cc",-1,0);}
     if(is_string($x)){return pack("ccV",10,0,strlen($x)).$x;}
     if(is_integer($x)){return pack("cV",-6,$x);}
-    if(is_array($x)){$a=pack("ccV",0,0,count($x));foreach($x as $b){$a.=self::e1($b);}return $a;}
     if(is_object($x)){return $x->s;}
-    throw new Exception("Can't encode this: " . var_export($x));
+    if(!is_array($x)){throw new Exception("Can't encode this: " . var_export($x));}
+    $a="";
+    if(self::aa($x)){//associative array->dict
+      $n=count($x);$a=pack("cccV",99,0,0,$n);$v=array();
+      foreach($x as $k => $_){$a.=pack("c",-11).$k.pack("c",0);$v[]=$_;}
+      $x=$v;//fall through
+    }
+    $a.=pack("ccV",0,0,count($x));foreach($x as $b){$a.=self::e1($b);}
+    return $a;
   }
   public static function enc($b,$x) {
     $x=self::e1($x);
@@ -59,7 +70,9 @@ class K {
     case 7:$a=unpack("V2",fread($x,8));if($a[2])throw new Exception("Number too long(64)");return $a[1];
     case 10:return fgetc($x);
     case 11:$s="";while(ord($c=fgetc($x)))$s.=$c;return $s;
+    case 99:$k=self::dec($x);$v=self::dec($x);return array_combine($k,$v);
     case 101:return null;
+    case 128:throw new KException(self::d1(11,$x));
     default:throw new Exception("Can't decode this $t yet");
     } 
   }
@@ -67,6 +80,7 @@ class K {
   public static function dec($x) {
     $t=ord(fgetc($x));
     if($t>=128)return self::d1(-($t-256),$x);
+    if($t==99||$t==98)return self::d1($t,$x);
     if(ord(fgetc($x)) != 0)throw new Exception("Protocol error");
     $n=self::d1(6,$x);
     if($t===10)return fread($x,$n);
@@ -77,8 +91,7 @@ class K {
 }
   
 //$k=new K();
-//print_r($k->k("{a::x}", K::S("whateveR")));
-//    print_r($k->k("k){a::`h`d`v!x}", array(42, 69, 38)));
+//print_r($k->k("{a::x;a}", array("dude" => 69, "foo" => "bar")));
 
 
 

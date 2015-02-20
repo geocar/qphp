@@ -44,10 +44,8 @@ not to bother sending any results.
 
 These things aren't implemented yet.
 
-* Dicts
 * Tables (no PHP support; array of dicts maybe? or an object?)
 * Guids (no PHP support; object type?)
 * Floats (awkward in PHP; strings?)
-* 64bit Ints (incorrect in PHP; strings?)
-* Exceptions (-128 just generates an exception; not the correct one)
+* 64bit Ints (requires 5.4 for native; strings?)
 
