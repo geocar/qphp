@@ -23,8 +23,8 @@ class K {
     fwrite($this->h,$x);
   }
   public function kr() {
-    $a=unpack("V2", fread($this->h,8));
-    $x=fread($this->h,$a[2]-8).pack('VVVV',0,0,0,0);// arthur doesn't pad
+    $a=unpack("l2", fread($this->h,8));
+    $x=fread($this->h,$a[2]-8).pack('llll',0,0,0,0);// arthur doesn't pad
     $h=fopen("php://memory", "r+b"); fwrite($h,$x); rewind($h); $o=self::dec($h); fclose($h);
     return $o;
   }
@@ -42,22 +42,22 @@ class K {
     if(is_null($x)){return pack("cc",101,0);}
     if($x === true){return pack("cc",-1,1);}
     if($x === false){return pack("cc",-1,0);}
-    if(is_string($x)){return pack("ccV",10,0,strlen($x)).$x;}
-    if(is_integer($x)){return pack("cV",-6,$x);}
+    if(is_string($x)){return pack("ccl",10,0,strlen($x)).$x;}
+    if(is_integer($x)){return pack("cl",-6,$x);}
     if(is_object($x)){return $x->s;}
     if(!is_array($x)){throw new Exception("Can't encode this: " . var_export($x));}
     $a="";
     if(self::aa($x)){//associative array->dict
-      $n=count($x);$a=pack("cccV",99,0,0,$n);$v=array();
+      $n=count($x);$a=pack("cccl",99,0,0,$n);$v=array();
       foreach($x as $k => $_){$a.=pack("c",-11).$k.pack("c",0);$v[]=$_;}
       $x=$v;//fall through
     }
-    $a.=pack("ccV",0,0,count($x));foreach($x as $b){$a.=self::e1($b);}
+    $a.=pack("ccl",0,0,count($x));foreach($x as $b){$a.=self::e1($b);}
     return $a;
   }
   public static function enc($b,$x) {
     $x=self::e1($x);
-    return pack("ccccV",1,$b,0,0,8+strlen($x)).$x;
+    return pack("ccccl",1,$b,0,0,8+strlen($x)).$x;
   }
 
   private static function d1($t,$x) {
@@ -66,8 +66,8 @@ class K {
     case 1:$n=ord(fgetc($x));return $n==1;
     case 4:$n=ord(fgetc($x));return $n;
     case 5:$a=unpack("i",fread($x,2));return $a[1];
-    case 6:$a=unpack("V",fread($x,4));return $a[1];
-    case 7:$a=unpack("V2",fread($x,8));if($a[2])throw new Exception("Number too long(64)");return $a[1];
+    case 6:$a=unpack("l",fread($x,4));return $a[1];
+    case 7:$a=unpack("l2",fread($x,8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
     case 10:return fgetc($x);
     case 11:$s="";while(ord($c=fgetc($x)))$s.=$c;return $s;
     case 99:$k=self::dec($x);$v=self::dec($x);return array_combine($k,$v);
@@ -91,7 +91,7 @@ class K {
 }
   
 //$k=new K();
-//print_r($k->k("{a::x;a}", array("dude" => 69, "foo" => "bar")));
+//print_r($k->k("-1"));
 
 
 
