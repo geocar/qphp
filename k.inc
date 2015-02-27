@@ -68,6 +68,7 @@ class K {
     case 5:$a=unpack("i",fread($x,2));return $a[1];
     case 6:$a=unpack("l",fread($x,4));return $a[1];
     case 7:$a=unpack("l2",fread($x,8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
+    case 9:$a=unpack("d",fread($x,8));return $a[1];
     case 10:return fgetc($x);
     case 11:$s="";while(ord($c=fgetc($x)))$s.=$c;return $s;
     case 99:$k=self::dec($x);$v=self::dec($x);return array_combine($k,$v);
