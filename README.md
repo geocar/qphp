@@ -36,10 +36,6 @@ not to bother sending any results.
    for($i=0;$i<100;++$i) $k->ka("1+$i");
    for($i=0;$i<100;++$i) $r[] = $k->kr();
 
-## Other Class Methods
-
-`K::enc($x)` can encode PHP objects into K, and `K::dec($h)` can decode from a handle h.
-
 # NYI
 
 These things aren't implemented yet.

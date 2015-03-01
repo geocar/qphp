@@ -1,11 +1,13 @@
 <?php
 class KException extends Exception {};
 class K {
-  private static $be;
+  private static $be = -1;
   private $h;
 
   public static function init() {
-    self::$be = (pack("N",-69) === pack("l",-69));
+    if(self::$be === -1) {
+      self::$be = (pack("N",-69) === pack("l",-69));
+    }
   }
 
   public function __construct($h="localhost",$p=1234,$up="anonymous") {
@@ -62,11 +64,10 @@ class K {
     $a.=pack("ccl",0,0,count($x));foreach($x as $b){$a.=self::e1($b);}
     return $a;
   }
-  public static function enc($b,$x) {
+  private static function enc($b,$x) {
     $x=self::e1($x);
     return pack("ccccl",!self::$be,$b,0,0,8+strlen($x)).$x;
   }
-
   private static function d1($t,$x) {
     switch($t){
     case 0:return self::dec($x);
@@ -84,8 +85,7 @@ class K {
     default:throw new Exception("Can't decode this $t yet");
     } 
   }
-
-  public static function dec($x) {
+  private static function dec($x) {
     $t=ord(fgetc($x));
     if($t>=128)return self::d1(-($t-256),$x);
     if($t==99||$t==98)return self::d1($t,$x);
