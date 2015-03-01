@@ -42,6 +42,5 @@ These things aren't implemented yet.
 
 * Tables (no PHP support; array of dicts maybe? or an object?)
 * Guids (no PHP support; object type?)
-* Floats (awkward in PHP; strings?)
 * 64bit Ints (requires 5.4 for native; strings?)
 
