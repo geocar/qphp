@@ -42,6 +42,14 @@ class K {
     $s = pack("c", -11) . $x . pack("c", 0);
     return (object)array("s" => $s);
   }
+  public static function G($x=null) {
+    if($x === null) {
+      if(function_exists('openssl_random_pseudo_bytes')) $x = openssl_random_pseudo_bytes(16);
+      else{$x="";for($i=0;$i<16;++$i)$x.=chr(mt_rand(0,255));}
+    } else { $x = hex2bin(str_replace("-","",$x)); }
+    return (object)array("s" => pack("c", -2) . $x);
+  }
+
   private static function aa($x) {
     $n=min(100,count($x));for($i=0;$i<$n;++$i)if(!isset($x[$i]))return true;
     return false;
