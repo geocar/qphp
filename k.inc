@@ -1,9 +1,16 @@
 <?php
 class KException extends Exception {};
 class K {
+  private static $be;
   private $h;
 
+  public static function init() {
+    self::$be = (pack("N",-69) === pack("l",-69));
+  }
+
   public function __construct($h="localhost",$p=1234,$up="anonymous") {
+    self::init();
+
     $this->h = fsockopen($h,$p);
     fwrite($this->h, $up.pack("cc", 1,0));
     if(ord(fgetc($this->h)) != 1) throw new Exception("Can't connect to k: $h:$p");
@@ -57,7 +64,7 @@ class K {
   }
   public static function enc($b,$x) {
     $x=self::e1($x);
-    return pack("ccccl",1,$b,0,0,8+strlen($x)).$x;
+    return pack("ccccl",!self::$be,$b,0,0,8+strlen($x)).$x;
   }
 
   private static function d1($t,$x) {
