@@ -17,7 +17,9 @@ class K {
     fwrite($this->h, $up.pack("cc", 1,0));
     if(ord(fgetc($this->h)) != 1) throw new Exception("Can't connect to k: $h:$p");
   }
-
+  function __destruct() {
+    fclose($this->h);
+  }
   public function ks($s) {
     if(func_num_args()===1){$x=self::enc(0,$s);}else{$x=self::enc(0,func_get_args());}
     fwrite($this->h,$x);
