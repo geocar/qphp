@@ -77,6 +77,12 @@ class K {
     $x=self::e1($x);
     return pack("ccccl",!self::$be,$b,0,0,8+strlen($x)).$x;
   }
+  private static function flip(&$c, &$x) {
+    foreach($x as$k=>$a)foreach($a as$i=>$v)$c[$i][$k]=$v;
+  }
+  private static function om(&$c) {
+    $o=array();foreach($c as$i=>$x)$o[$i]=(object)$x;return $o;
+  }
   private static function d1($t,$x) {
     switch($t){
     case 0:return self::dec($x);
@@ -89,6 +95,7 @@ class K {
     case 9:$a=unpack("d",fread($x,8));return $a[1];
     case 10:return fgetc($x);
     case 11:$s="";while(ord($c=fgetc($x)))$s.=$c;return $s;
+    case 98:fgetc($x);$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
     case 99:$k=self::dec($x);$v=self::dec($x);return array_combine($k,$v);
     case 101:return null;
     case 128:throw new KException(self::d1(11,$x));
@@ -107,6 +114,4 @@ class K {
     return $a;
   }
 }
-  
-
 

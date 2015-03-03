@@ -18,6 +18,10 @@ Can also create symbols with `K::S()` e.g.
 
 into KDB.
 
+## Guid Construction
+
+`K::G()` creates a guid.
+
 ## Instance Methods
 
 * `$k->k()`
@@ -40,6 +44,5 @@ not to bother sending any results.
 
 These things aren't implemented yet.
 
-* Tables (no PHP support; array of dicts maybe? or an object?)
 * 64bit Ints (requires 5.4 for native; strings?)
 
