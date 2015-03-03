@@ -82,7 +82,7 @@ class K {
     case 0:return self::dec($x);
     case 1:$n=ord(fgetc($x));return $n==1;
     case 4:$n=ord(fgetc($x));return $n;
-    case 5:$a=unpack("i",fread($x,2));return $a[1];
+    case 5:$a=unpack("s",fread($x,2));return $a[1];
     case 6:$a=unpack("l",fread($x,4));return $a[1];
     case 7:$a=unpack("l2",fread($x,8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
     case 8:$a=unpack("f",fread($x,8));return $a[1];
