@@ -108,8 +108,7 @@ class K {
   }
 }
   
-//$k=new K();
-//print_r($k->k("-1"));
-
+//$k=new K("localhost", 1234);
+//var_dump($k->k("-1j"));
 
 
