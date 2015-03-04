@@ -80,10 +80,12 @@ class K {
     return pack("ccccl",!self::$be,$b,0,0,8+strlen($x)).$x;
   }
   private static function flip(&$c, &$x) {
-    foreach($x as$k=>$a)foreach($a as$i=>$v)$c[$i][$k]=$v;
+    if(!is_array($x))return;
+    foreach($x as$k=>&$a)if(is_array($a))foreach($a as$i=>&$v)$c[$i][$k]=$v;
+    foreach($x as$k=>&$v)if(!is_array($v))foreach($c as $i=>&$_)$c[$i][$k]=$v;
   }
   private static function om(&$c) {
-    $o=array();foreach($c as$i=>$x)$o[$i]=(object)$x;return $o;
+    $o=array();foreach($c as$i=>&$x)$o[$i]=(object)$x;return $o;
   }
   private static function d1($t,$x) {
     switch($t){
