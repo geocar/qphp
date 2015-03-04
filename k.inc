@@ -1,5 +1,28 @@
 <?php
 class KException extends Exception {};
+class KScan {
+  private $s,$i,$n;
+  public function __construct($s) {
+    $this->s=$s;
+    $this->i=0;
+    $this->n=strlen($s);
+  }
+  public function r8() {
+    if($this->i >= $this->n) return -1; $i=$this->i; $this->i++;
+    $x=ord($this->s{$i});
+    if($x>=128)$x-=256;
+    return $x;
+  }
+  public function rn($s,$n) {$a=unpack($s,$this->sn($n));return $a[1];}
+  public function s1() { if($this->i >= $this->n) return chr(0); $i=$this->i; $this->i++; return $this->s{$i}; }
+  public function sn($n) {
+    if($this->i >= $this->n) return str_repeat(chr(0),$n);
+    $i=$this->i;
+    $this->i += $n;
+    if($this->i <= $this->n) return substr($this->s, $i, $n);
+    return substr($this->s, $i, $this->n - $i);
+  }
+}
 class K {
   private static $be = -1;
   private $h;
@@ -35,9 +58,7 @@ class K {
   }
   public function kr() {
     $a=unpack("l2", fread($this->h,8));
-    $x=fread($this->h,$a[2]-8).pack('llll',0,0,0,0);// arthur doesn't pad
-    $h=fopen("php://memory", "r+b"); fwrite($h,$x); rewind($h); $o=self::dec($h); fclose($h);
-    return $o;
+    return self::dec(new KScan(fread($this->h,$a[2]-8)));
   }
 
   public static function S($x) {
@@ -90,16 +111,17 @@ class K {
   private static function d1($t,$x) {
     switch($t){
     case 0:return self::dec($x);
-    case 1:$n=ord(fgetc($x));return $n==1;
-    case 4:$n=ord(fgetc($x));return $n;
-    case 5:$a=unpack("s",fread($x,2));return $a[1];
-    case 6:$a=unpack("l",fread($x,4));return $a[1];
-    case 7:$a=unpack("l2",fread($x,8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
-    case 8:$a=unpack("f",fread($x,8));return $a[1];
-    case 9:$a=unpack("d",fread($x,8));return $a[1];
-    case 10:return fgetc($x);
-    case 11:$s="";while(ord($c=fgetc($x)))$s.=$c;return $s;
-    case 98:fgetc($x);$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
+    case 1:return 1==$x->r8();
+    case 4:return $x->r8();
+    case 5:return $x->rn("s",2);
+    case 6:return $x->rn("l",4);
+    case 7:$a=unpack("l2",$x->sn(8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
+    case 8:return $x->rn("f",4);
+    case 9:return $x->rn("d",8);
+    case 10:return $x->s1();
+    case 11:$s="";while(ord($c=$x->s1()))$s.=$c;return $s;
+    case 14:return 86400*(10957+$x->rn("l",4));
+    case 98:$x->s1();$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
     case 99:$k=self::dec($x);$v=self::dec($x);return array_combine($k,$v);
     case 101:return null;
     case 128:throw new KException(self::d1(11,$x));
@@ -107,14 +129,13 @@ class K {
     } 
   }
   private static function dec($x) {
-    $t=ord(fgetc($x));
-    if($t>=128)return self::d1(-($t-256),$x);
+    $t=$x->r8();
+    if($t<0)return self::d1(-$t,$x);
     if($t==99||$t==98)return self::d1($t,$x);
-    if(ord(fgetc($x)) != 0)throw new Exception("Protocol error");
+    if($x->r8() != 0)throw new Exception("Protocol error");
     $n=self::d1(6,$x);
-    if($t===10)return fread($x,$n);
-    $a=array();
-    for($i=0;$i<$n;++$i)$a[]=self::d1($t,$x);
+    if($t===10)return $x->sn($n);
+    $a=array();for($i=0;$i<$n;++$i)$a[]=self::d1($t,$x);
     return $a;
   }
 }
