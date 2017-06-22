@@ -27,18 +27,36 @@ class K {
   private static $be = -1;
   private $h;
 
-  public static function init() {
+  private static function init() {
     if(self::$be === -1) {
       self::$be = (pack("N",-69) === pack("l",-69));
     }
   }
 
+  public static function server_loop($p=1234, $k=null, $h="localhost") {//args server_loop(port,receiver) or server_loop(hostname,port,receiver)
+    if(is_integer($k)){$h=$p;$p=$k;$k=$h;}
+    self::init();
+    $client = array(); $klient = array();
+    $server = stream_socket_server("tcp://{$h}:{$p}", $errno, $errstr);if(false === $server)throw new Exception($errstr, $errno);
+    for(;;) {
+      $r = $client;$r[] = $server;$w=null;$e=null;if(0>=stream_select($r,$w,$e,null))continue;
+      foreach($r as $x) {
+        if($x === $server){$y=stream_socket_accept($x,0);while(ord(fgetc($y))>0);fwrite($y,pack("c",1));$client[(int)$y]=$y;$klient[(int)$y]=new K($y,0);continue;}
+	$y=$klient[(int)$x];$g=array();$a=$y->kr($g);if(!is_array($a))$a=array($a);if(empty($g)){unset($client[(int)$x]);unset($klient[(int)$x]);continue;}
+	if($g[1]==257)fwrite($x,self::enc(2,@call_user_func_array(array($k,'k'),$a)));else @call_user_func_array(array($k,'ks'),$a);
+      }
+    }
+  }
+
   public function __construct($h="localhost",$p=1234,$up="anonymous") {
     self::init();
-
-    $this->h = fsockopen($h,$p);
-    fwrite($this->h, $up.pack("cc", 1,0));
-    if(ord(fgetc($this->h)) != 1) throw new Exception("Can't connect to k: $h:$p");
+    if($p>0) {
+      $this->h = fsockopen($h,$p);
+      fwrite($this->h, $up.pack("cc", 1,0));
+      if(ord(fgetc($this->h)) != 1) throw new Exception("Can't connect to k: $h:$p");
+    }else{
+      $this->h=$h;
+    }
   }
   function __destruct() {
     fclose($this->h);
@@ -56,9 +74,9 @@ class K {
     if(func_num_args()===1){$x=self::enc(1,$s);}else{$x=self::enc(1,func_get_args());}
     fwrite($this->h,$x);
   }
-  public function kr() {
-    $a=unpack("l2", fread($this->h,8));
-    return self::dec(new KScan(fread($this->h,$a[2]-8)));
+  public function kr(&$b) {
+    $a=@unpack("l2", fread($this->h,8));if(isset($b))$b=$a;$r=$a[2]-8;if(0>=$r)return null;
+    return self::dec(new KScan(fread($this->h,$r)));
   }
 
   public static function S($x) {
