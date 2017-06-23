@@ -35,15 +35,17 @@ class K {
 
   public static function server_loop($p=1234, $k=null, $h="localhost") {//args server_loop(port,receiver) or server_loop(hostname,port,receiver)
     if(is_integer($k)){$h=$p;$p=$k;$k=$h;}
-    self::init();
-    $client = array(); $klient = array();
+    self::init();$KS=array($k,'ks');$K=array($k,'k');
+    $client = array(); $klient = array(); $buffer = array();
     $server = stream_socket_server("tcp://{$h}:{$p}", $errno, $errstr);if(false === $server)throw new Exception($errstr, $errno);
     for(;;) {
       $r = $client;$r[] = $server;$w=null;$e=null;if(0>=stream_select($r,$w,$e,null))continue;
       foreach($r as $x) {
-        if($x === $server){$y=stream_socket_accept($x,0);while(ord(fgetc($y))>0);fwrite($y,pack("c",1));$client[(int)$y]=$y;$klient[(int)$y]=new K($y,0);continue;}
-	$y=$klient[(int)$x];$g=array();$a=$y->kr($g);if(!is_array($a))$a=array($a);if(empty($g)){unset($client[(int)$x]);unset($klient[(int)$x]);continue;}
-	if($g[1]==257)fwrite($x,self::enc(2,@call_user_func_array(array($k,'k'),$a)));else @call_user_func_array(array($k,'ks'),$a);
+        if($x === $server){$i=(int)($y=stream_socket_accept($x,0));stream_set_blocking($y,0);$client[$i]=$y;$klient[$i]=null;$buffer[$i]="";continue;}
+        $i=(int)$x;$y=$klient[$i];
+	if(is_null($y)){$y=$client[$i];while(false!==($c=fgetc($y))&&ord($c)>0);if($c!==false){fwrite($y,pack("c",1));$klient[$i]=new K($y,0);}continue;}
+	$b=$buffer[$i];$g=array();$a=$y->kr($b,$g);$buffer[$i]=$b; if(feof($x)){unset($client[$i]);unset($klient[$i]);continue;} if($a===false)continue; 
+	if(!is_array($a))$a=array($a);if($g[1]==257)fwrite($x,self::enc(2,call_user_func_array($K,$a)));else call_user_func_array($KS,$a);
       }
     }
   }
@@ -74,9 +76,16 @@ class K {
     if(func_num_args()===1){$x=self::enc(1,$s);}else{$x=self::enc(1,func_get_args());}
     fwrite($this->h,$x);
   }
-  public function kr(&$b) {
-    $a=@unpack("l2", fread($this->h,8));if(isset($b))$b=$a;$r=$a[2]-8;if(0>=$r)return null;
-    return self::dec(new KScan(fread($this->h,$r)));
+  private function rd($n,&$nb){
+    if(isset($nb)){$r=strlen($nb);if($r>=$n){$x=substr($nb,0,$n);$nb=substr($nb,$n,$r-$n);return $x;}}else{$r=0;}
+    $x=fread($this->h,$n-$r);
+    if($x===false)return false;
+    if(isset($nb)){$r=strlen($x=$nb.$x);if($r>=$n){$nb=substr($x,$n,$r-$n);$x=substr($x,0,$n);}else{$nb=$x;$x=false;}}
+    return $x;
+  }
+  public function kr(&$nb,&$b) {
+    if(false===($s=$this->rd(8,$nb)))return $s;$a=@unpack("l2", $s);if(isset($b))$b=$a;$r=$a[2]-8;if($r<=0)return null;//hup.
+    if(false===($s=$this->rd($r,$nb)))return $s;return self::dec(new KScan($s));
   }
 
   public static function S($x) {
