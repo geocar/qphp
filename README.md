@@ -1,4 +1,6 @@
-# KDB client for PHP
+# KDB IPC implementation for PHP
+
+## KDB Client
 
 A usable, but mostly incomplete K client in PHP:
 
@@ -8,6 +10,14 @@ A usable, but mostly incomplete K client in PHP:
 Can also create symbols with `K::S()` e.g.
 
     print_r($k->k("{insert[x](`h`d`v!y)}", K::S("table"), array(array(42), array(69), array(38))));
+
+## KDB Server
+
+    class Receiver {
+      public function ks($a, $x=null, $y=null, $z=null) {} // called for async
+      public function k($a , $x=null, $y=null, $z=null) {return K::S("table")} // called for sync
+    };
+    K::server_loop(1234, new Receiver());
 
 # Reference Guide
 ## Symbol Construction
