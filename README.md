@@ -47,8 +47,8 @@ not to bother sending any results.
 
 `ka` and `kr` work like the the send and receive legs of `k`. This allows you to pipeline messages:
 
-   for($i=0;$i<100;++$i) $k->ka("1+$i");
-   for($i=0;$i<100;++$i) $r[] = $k->kr();
+    for($i=0;$i<100;++$i) $k->ka("1+$i");
+    for($i=0;$i<100;++$i) $r[] = $k->kr();
 
 # NYI
 
