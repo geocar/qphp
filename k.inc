@@ -83,7 +83,7 @@ class K {
     if(isset($nb)){$r=strlen($x=$nb.$x);if($r>=$n){$nb=substr($x,$n,$r-$n);$x=substr($x,0,$n);}else{$nb=$x;$x=false;}}
     return $x;
   }
-  public function kr(&$nb,&$b) {
+  public function kr(&$nb=null,&$b=null) {
     if(false===($s=$this->rd(8,$nb)))return $s;$a=@unpack("l2", $s);if(isset($b))$b=$a;$r=$a[2]-8;if($r<=0)return null;//hup.
     if(false===($s=$this->rd($r,$nb)))return $s;return self::dec(new KScan($s));
   }
