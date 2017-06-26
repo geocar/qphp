@@ -34,21 +34,27 @@ into KDB.
 
 ## Instance Methods
 
-* `$k->k()`
-* `$k->ks()`
+* `$k->k(...)`
+* `$k->ks(...)`
 
 These send a statement (first argument). Optional arguments will be assigned to x, y, z, etc.
 
 `k` will send a message, then wait for (and decode) the results.  `ks` will send a message and tell KDB
 not to bother sending any results.
 
-* `$k->ka()`
+* `$k->ka(...)`
 * `$k->kr()`
 
 `ka` and `kr` work like the the send and receive legs of `k`. This allows you to pipeline messages:
 
     for($i=0;$i<100;++$i) $k->ka("1+", $i);
     for($i=0;$i<100;++$i) $r[] = $k->kr();
+
+## Read from String
+
+    $r = $k->krs("<ipc message>");
+
+If you have an IPC message in a string (for example, you read it from a file) then you can parse it directly.
 
 # NYI
 
