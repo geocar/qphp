@@ -78,19 +78,20 @@ class K {
     fwrite($this->h,$x);
   }
   private function rd($n,&$nb){
-    if(isset($nb)){$r=strlen($nb);if($r>=$n){$x=substr($nb,0,$n);$nb=substr($nb,$n,$r-$n);return $x;}}else{$r=0;}
-    $x=fread($this->h,$n-$r);
+    if(isset($nb)){$r=strlen($nb);
+    if($r>=$n){$x=substr($nb,0,$n);$nb=substr($nb,$n,$r-$n);return $x;}}else{$r=0;}
+    $x = stream_get_contents($this->h, $n-$r);
     if($x===false)return false;
-    if(isset($nb)){$r=strlen($x=$nb.$x);if($r>=$n){$nb=substr($x,$n,$r-$n);$x=substr($x,0,$n);}else{$nb=$x;$x=false;}}
-    return $x;
+    if(isset($nb)){$r=strlen($x=$nb.$x);if($r>=$n){$nb=substr($x,$n,$r-$n);$x=substr($x,0,$n);}else{$nb=$x;$x=false;}}return $x;
   }
   public function krs($x){
     $this->b.=$x;
     return $this->krs();
   }
   public function kr(&$b=null) {
-    if(false===($s=$this->rd(8,$this->b)))return $s;$a=@unpack("l2", $s);if(isset($b))$b=$a;$r=$a[2]-8;if($r<=0)return null;//hup.
-    if(false===($s=$this->rd($r,$this->b)))return $s;return self::dec(new KScan($s));
+    if(false===($s=$this->rd(8,$this->b)))return $s;$a=unpack("l2", $s);
+    if(isset($b))$b=$a;$r=$a[2]-8;if($r<=0)return null;//hup.
+    if(false===($s=$this->rd($r,$this->b)))return $s; return self::dec(new KScan($s));
   }
 
   public static function S($x) {
@@ -154,7 +155,7 @@ class K {
     case 11:$s="";while(ord($c=$x->s1()))$s.=$c;return $s;
     case 14:return 86400*(10957+$x->rn("l",4));
     case 98:$x->s1();$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
-    case 99:$k=self::dec($x);$v=self::dec($x);return array_combine($k,$v);
+    case 99:$k=self::dec($x);$v=self::dec($x);if(empty($v))return $k;return array_combine($k,$v);
     case 101:return null;
     case 128:throw new KException(self::d1(11,$x));
     default:throw new Exception("Can't decode this $t yet");
