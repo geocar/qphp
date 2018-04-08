@@ -136,7 +136,10 @@ class K {
   private static function flip(&$c, &$x) {
     if(!is_array($x))return;
     foreach($x as$k=>&$a)if(is_array($a))foreach($a as$i=>&$v)$c[$i][$k]=$v;
-    foreach($x as$k=>&$v)if(!is_array($v))foreach($c as $i=>&$_)$c[$i][$k]=$v;
+    foreach($x as$k=>&$v){
+			if(is_string($v))foreach($c as $i=>&$_)$c[$i][$k]=substr($v,$i,1);
+			else if(!is_array($v))foreach($c as $i=>&$_)$c[$i][$k]=$v;//atom
+		}
   }
   private static function om(&$c) {
     $o=array();foreach($c as$i=>&$x)$o[$i]=(object)$x;return $o;
@@ -153,6 +156,7 @@ class K {
     case 9:return $x->rn("d",8);
     case 10:return $x->s1();
     case 11:$s="";while(ord($c=$x->s1()))$s.=$c;return $s;
+    case 12:return $x->rn("d",8);
     case 14:return 86400*(10957+$x->rn("l",4));
     case 98:$x->s1();$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
     case 99:$k=self::dec($x);$v=self::dec($x);if(empty($v))return $k;return array_combine($k,$v);
