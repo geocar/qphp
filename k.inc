@@ -139,6 +139,7 @@ class K {
     foreach($x as$k=>&$v){
 			if(is_string($v))foreach($c as $i=>&$_)$c[$i][$k]=substr($v,$i,1);
 			else if(!is_array($v))foreach($c as $i=>&$_)$c[$i][$k]=$v;//atom
+			else foreach($c as $i=>&$_)$c[$i][$k]=$v[$i];
 		}
   }
   private static function om(&$c) {
@@ -158,6 +159,11 @@ class K {
     case 11:$s="";while(ord($c=$x->s1()))$s.=$c;return $s;
     case 12:return $x->rn("d",8);
     case 14:return 86400*(10957+$x->rn("l",4));
+		case 15:return $x->rn("f",8)*864e5;
+		case 16:return $x->rn("l",8)*1e6;
+		case 17:return $x->rn("l",4)*6e4;
+		case 18:return $x->rn("l",4)/1e3;
+		case 19:return $x->rn("l",4);
     case 98:$x->s1();$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
     case 99:$k=self::dec($x);$v=self::dec($x);if(empty($v))return $k;return array_combine($k,$v);
     case 101:return null;
