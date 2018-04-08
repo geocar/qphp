@@ -56,8 +56,8 @@ class K {
     $this->b="";
     if($p>0) {
       $this->h = fsockopen($h,$p);
-      fwrite($this->h, $up.pack("cc", 1,0));
-      if(ord(fgetc($this->h)) != 1) throw new Exception("Can't connect to k: $h:$p");
+      fwrite($this->h, $up.pack("cc", 3,0));
+      if(($c=ord(fgetc($this->h))) != 3) throw new Exception("Can't connect to k: $h:$p ' $c");
     }else{
       $this->h=$h;
     }
@@ -150,6 +150,7 @@ class K {
     switch($t){
     case 0:return self::dec($x);
     case 1:return 1==$x->r8();
+		case 2:return (object)array("s" => pack('c',-2) . $x->sn(16));
     case 4:return $x->r8();
     case 5:return $x->rn("s",2);
     case 6:return $x->rn("l",4);
