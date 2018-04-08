@@ -55,10 +55,3 @@ not to bother sending any results.
     $r = $k->krs("<ipc message>");
 
 If you have an IPC message in a string (for example, you read it from a file) then you can parse it directly.
-
-# NYI
-
-These things aren't implemented yet.
-
-* 64bit Ints (requires 5.4 for native; strings?)
-

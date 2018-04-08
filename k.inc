@@ -1,4 +1,5 @@
 <?php
+if(PHP_VERSION_ID > 50603) define('can_int64',true);
 class KException extends Exception {};
 class KScan {
   private $s,$i,$n;
@@ -152,7 +153,9 @@ class K {
     case 4:return $x->r8();
     case 5:return $x->rn("s",2);
     case 6:return $x->rn("l",4);
-    case 7:$a=unpack("l2",$x->sn(8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
+    case 7:
+			if(defined('can_int64'))return $x->rn('q',8);
+			$a=unpack("l2",$x->sn(8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
     case 8:return $x->rn("f",4);
     case 9:return $x->rn("d",8);
     case 10:return $x->s1();
