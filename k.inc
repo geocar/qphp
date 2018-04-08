@@ -136,11 +136,10 @@ class K {
   }
   private static function flip(&$c, &$x) {
     if(!is_array($x))return;
-    foreach($x as$k=>&$a)if(is_array($a))foreach($a as$i=>&$v)$c[$i][$k]=$v;
     foreach($x as$k=>&$v){
-			if(is_string($v))foreach($c as $i=>&$_)$c[$i][$k]=substr($v,$i,1);
+			if(is_string($v))for($i=0,$n=strlen($v);$i<$n;++$i)$c[$i][$k]=substr($v,$i,1);
 			else if(!is_array($v))foreach($c as $i=>&$_)$c[$i][$k]=$v;//atom
-			else foreach($c as $i=>&$_)$c[$i][$k]=$v[$i];
+			else for($i=0,$n=count($v);$i<$n;++$i)$c[$i][$k]=$v[$i];
 		}
   }
   private static function om(&$c) {
