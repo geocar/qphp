@@ -1,4 +1,5 @@
 <?php
+if(PHP_VERSION_ID > 50603) define('can_int64',true);
 class KException extends Exception {};
 class KScan {
   private $s,$i,$n;
@@ -135,26 +136,48 @@ class K {
   }
   private static function flip(&$c, &$x) {
     if(!is_array($x))return;
-    foreach($x as$k=>&$a)if(is_array($a))foreach($a as$i=>&$v)$c[$i][$k]=$v;
-    foreach($x as$k=>&$v)if(!is_array($v))foreach($c as $i=>&$_)$c[$i][$k]=$v;
+    foreach($x as$k=>&$v){
+			if(is_string($v))for($i=0,$n=strlen($v);$i<$n;++$i)$c[$i][$k]=substr($v,$i,1);
+			else if(!is_array($v))foreach($c as $i=>&$_)$c[$i][$k]=$v;//atom
+			else for($i=0,$n=count($v);$i<$n;++$i)$c[$i][$k]=$v[$i];
+		}
   }
   private static function om(&$c) {
     $o=array();foreach($c as$i=>&$x)$o[$i]=(object)$x;return $o;
   }
+	private static function date($x) {
+		return (864e5*10957)+$x;
+	}
   private static function d1($t,$x) {
     switch($t){
     case 0:return self::dec($x);
     case 1:return 1==$x->r8();
+		case 2:return (object)array("s" => pack('c',-2) . $x->sn(16));
     case 4:return $x->r8();
     case 5:return $x->rn("s",2);
     case 6:return $x->rn("l",4);
-    case 7:$a=unpack("l2",$x->sn(8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
+    case 7:
+			if(defined('can_int64'))return $x->rn('q',8);
+			$a=unpack("l2",$x->sn(8));if($a[2]==-1&&$a[1]<0)return $a[1];if($a[2])throw new Exception("Number too long(64)");return $a[1];
     case 8:return $x->rn("f",4);
     case 9:return $x->rn("d",8);
     case 10:return $x->s1();
     case 11:$s="";while(ord($c=$x->s1()))$s.=$c;return $s;
-    case 12:return $x->rn("d",8);
-    case 14:return 86400*(10957+$x->rn("l",4));
+    case 12:
+			if(defined('can_int64'))return self::date($x->rn('q',8)/1e6);
+			$a=unpack("l2",$x->sn(8));if($a[2]==-1&&$a[1]<0)return self::date($a[1]/1e6);
+			if($a[2])throw new Exception("Number too long(64; upgrade your php)");
+			return self::date($a[1]/1e6);
+    case 14:return self::date(864e5*$x->rn("l",4));
+		case 15:return self::date($x->rn("f",8)*864e5);
+		case 16:
+			if(defined('can_int64'))return self::date($x->rn('q',8)*1e6);
+			$a=unpack("l2",$x->sn(8));if($a[2]==-1&&$a[1]<0)return self::date(1e6*$a[1]);
+			if($a[2])throw new Exception("Number too long(64; upgrade your php)");
+			return self::date(1e6*$a[1]);
+		case 17:return self::date($x->rn("l",4)*6e4);
+		case 18:return self::date($x->rn("l",4)/1e3);
+		case 19:return self::date($x->rn("l",4));
     case 98:$x->s1();$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
     case 99:$k=self::dec($x);$v=self::dec($x);if(empty($v))return $k;return array_combine($k,$v);
     case 101:return null;
