@@ -86,7 +86,7 @@ class K {
   }
   public function krs($x){
     $this->b.=$x;
-    return $this->krs();
+    return $this->kr();
   }
   public function kr(&$b=null) {
     if(false===($s=$this->rd(8,$this->b)))return $s;$a=unpack("l2", $s);
