@@ -165,7 +165,7 @@ class K {
     $t=$x->r8();
     if($t<0)return self::d1(-$t,$x);
     if($t==99||$t==98)return self::d1($t,$x);
-    if($x->r8() != 0)throw new Exception("Protocol error");
+    $x->r8();
     $n=self::d1(6,$x);
     if($t===10)return $x->sn($n);
     $a=array();for($i=0;$i<$n;++$i)$a[]=self::d1($t,$x);
