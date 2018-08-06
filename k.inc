@@ -153,6 +153,7 @@ class K {
     case 9:return $x->rn("d",8);
     case 10:return $x->s1();
     case 11:$s="";while(ord($c=$x->s1()))$s.=$c;return $s;
+    case 12:return $x->rn("d",8);
     case 14:return 86400*(10957+$x->rn("l",4));
     case 98:$x->s1();$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
     case 99:$k=self::dec($x);$v=self::dec($x);if(empty($v))return $k;return array_combine($k,$v);
