@@ -55,8 +55,8 @@ class K {
     $this->b="";
     if($p>0) {
       $this->h = fsockopen($h,$p);
-      fwrite($this->h, $up.pack("cc", 1,0));
-      if(ord(fgetc($this->h)) != 1) throw new Exception("Can't connect to k: $h:$p");
+      fwrite($this->h, $up.pack("c", 0));
+      if(ord(fgetc($this->h)) != 0) throw new Exception("Can't connect to k: $h:$p");
     }else{
       $this->h=$h;
     }
