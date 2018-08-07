@@ -44,7 +44,7 @@ class K {
       foreach($r as $x) {
         if($x === $server){$i=(int)($y=stream_socket_accept($x,0));stream_set_blocking($y,0);$client[$i]=$y;$klient[$i]=null;continue;}
         $i=(int)$x;$y=$klient[$i];
-	if(is_null($y)){$y=$client[$i];while(false!==($c=fgetc($y))&&ord($c)>0);if($c!==false){fwrite($y,pack("c",1));$klient[$i]=new K($y,0);}continue;}
+	if(is_null($y)){$y=$client[$i];while(false!==($c=fgetc($y))&&ord($c)>0);if($c!==false){fwrite($y,pack("c",0));$klient[$i]=new K($y,0);}continue;}
 	$g=array();$a=$y->kr($g); if(feof($x)){unset($client[$i]);unset($klient[$i]);continue;} if($a===false)continue; 
 	if(!is_array($a))$a=array($a);if($g[1]==257)fwrite($x,self::enc(2,call_user_func_array($K,$a)));else call_user_func_array($KS,$a);
       }
