@@ -180,7 +180,7 @@ class K {
 		case 19:return self::date($x->rn("l",4));
     case 98:$x->s1();$k=self::dec($x);$v=self::dec($x);$c=array();self::flip($c,$k);self::flip($c,$v);return self::om($c);
     case 99:$k=self::dec($x);$v=self::dec($x);if(empty($v))return $k;return array_combine($k,$v);
-    case 101:return null;
+    case 101:$x->r8();return null;
     case 128:throw new KException(self::d1(11,$x));
     default:throw new Exception("Can't decode this $t yet");
     } 
@@ -188,7 +188,7 @@ class K {
   private static function dec($x) {
     $t=$x->r8();
     if($t<0)return self::d1(-$t,$x);
-    if($t==99||$t==98)return self::d1($t,$x);
+    if($t>=98)return self::d1($t,$x);
     $x->r8();
     $n=self::d1(6,$x);
     if($t===10)return $x->sn($n);
