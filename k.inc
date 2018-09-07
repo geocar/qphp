@@ -79,10 +79,9 @@ class K {
     fwrite($this->h,$x);
   }
   private function rd($n,&$nb){
-    if(isset($nb)){$r=strlen($nb);
-    if($r>=$n){$x=substr($nb,0,$n);$nb=substr($nb,$n,$r-$n);return $x;}}else{$r=0;}
+    if(isset($nb)){$r=strlen($nb);if($r>=$n){$x=substr($nb,0,$n);$nb=substr($nb,$n,$r-$n);return $x;}}else{$r=0;}
     $x = stream_get_contents($this->h, $n-$r);
-    if($x===false)return false;
+    if($x===false||$x==="")return false;
     if(isset($nb)){$r=strlen($x=$nb.$x);if($r>=$n){$nb=substr($x,$n,$r-$n);$x=substr($x,0,$n);}else{$nb=$x;$x=false;}}return $x;
   }
   public function krs($x){
