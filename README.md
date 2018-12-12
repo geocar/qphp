@@ -55,3 +55,16 @@ not to bother sending any results.
     $r = $k->krs("<ipc message>");
 
 If you have an IPC message in a string (for example, you read it from a file) then you can parse it directly.
+
+# Opinionated TLS mode
+
+If you're using kdb+ in TLS mode, you can connect if you supply the CA certificate so that qphp can verify it:
+
+    $k = new KTLS("ca.pem","localhost",1234);
+    print_r($k->k("2+2"));
+
+You can also implement a TLS server:
+
+    KTLS::server_loop(array("ssl" => array("local_cert" => "server-crt.pem", "local_pk" => "server-key.pem")),
+      1234, new Receiver());
+

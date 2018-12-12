@@ -24,6 +24,26 @@ class KScan {
 		return substr($this->s, $i, $this->n - $i);
 	}
 }
+class KTLS extends K {
+	public function __construct($context,$hostname,$p=1234,$up="anonymous") {
+		if(is_string($context)) $context = array("ssl" => array("cafile" => $context));
+		$context["ssl"]["verify_peer"] = TRUE;
+		$context["ssl"]["verify_peer_name"] = TRUE;
+		$context["ssl"]["verify_depth"] = 12;
+		$context["ssl"]["ciphers"] = "HIGH";
+
+		$sock = stream_socket_client("tls://{$hostname}:{$p}", $errno, $errstr, -1, STREAM_CLIENT_CONNECT, stream_context_create($context));
+		if(false === $sock)throw new Exception($errstr, $errno);
+		parent::__construct($sock, 0, $up);
+		$this->i_();
+	}
+	public static function server_loop($context=null, $p=1234, $k=null, $h="0") { // "Declaration of KTLS::server_loop(...) should be compatible with K::server_loop(...)"
+		$context["ssl"]["ciphers"] = "HIGH";
+		$sock = stream_socket_server("tls://{$h}:{$p}", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, stream_context_create($context));
+		if(false === $sock)throw new Exception($errstr, $errno);
+		K::server_loop($sock, $k, "ignored");
+	}
+}
 class K {
 	private static $be = -1;
 	private $h,$b;
@@ -38,17 +58,26 @@ class K {
 		if(is_integer($k)){$h=$p;$p=$k;$k=$h;}
 		self::init();$KS=array($k,'ks');$K=array($k,'k');
 		$client = array(); $klient = array();
-		$server = stream_socket_server("tcp://{$h}:{$p}", $errno, $errstr);if(false === $server)throw new Exception($errstr, $errno);
+		if(is_integer($p)) {
+			$server = stream_socket_server("tcp://{$h}:{$p}", $errno, $errstr);
+		} else {
+			$server = $p;
+		}
+		if(false === $server)throw new Exception($errstr, $errno);
 		for(;;) {
 			$r = $client;$r[] = $server;$w=null;$e=null;if(0>=stream_select($r,$w,$e,null))continue;
 			foreach($r as $x) {
 				if($x === $server){$i=(int)($y=stream_socket_accept($x,0));stream_set_blocking($y,0);$client[$i]=$y;$klient[$i]=null;continue;}
 				$i=(int)$x;$y=$klient[$i];
-				if(is_null($y)){$y=$client[$i];while(false!==($c=fgetc($y))&&ord($c)>0);if($c!==false){fwrite($y,pack("c",0));$klient[$i]=new K($y,0);}continue;}
+				if(is_null($y)){$y=$client[$i];while(false!==($c=fgetc($y))&&ord($c)>0);if($c!==false){self::w_($y,pack("c",0));$klient[$i]=new K($y,0);}continue;}
 				$g=array();$a=$y->kr($g); if(feof($x)){unset($client[$i]);unset($klient[$i]);continue;} if($a===false)continue; 
-				if(!is_array($a))$a=array($a);if($g[1]==257)fwrite($x,self::enc(2,call_user_func_array($K,$a)));else call_user_func_array($KS,$a);
+				if(!is_array($a))$a=array($a);if($g[1]==257)self::w_($x,self::enc(2,call_user_func_array($K,$a)));else call_user_func_array($KS,$a);
 			}
 		}
+	}
+	protected function i_() {
+		self::w_($this->h, $up.pack("c", 0));
+		if(ord(fgetc($this->h)) != 0) throw new Exception("Can't connect to k: $h:$p");
 	}
 
 	public function __construct($h="localhost",$p=1234,$up="anonymous") {
@@ -56,8 +85,7 @@ class K {
 		$this->b="";
 		if($p>0) {
 			$this->h = fsockopen($h,$p);
-			fwrite($this->h, $up.pack("c", 0));
-			if(ord(fgetc($this->h)) != 0) throw new Exception("Can't connect to k: $h:$p");
+			$this->i_();
 		}else{
 			$this->h=$h;
 		}
@@ -65,18 +93,23 @@ class K {
 	function __destruct() {
 		fclose($this->h);
 	}
+	private static function w_($h, $x) {
+		$r=fwrite($h,$x);
+		if($r === false) throw new Exception("Write failed");
+		if($r < strlen($x)) return self::w_($h, substr($x, $r));
+	}
 	public function ks($s) {
 		if(func_num_args()===1){$x=self::enc(0,$s);}else{$x=self::enc(0,func_get_args());}
-		fwrite($this->h,$x);
+		self::w_($this->h, $x);
 	}
 	public function k($s) {
 		if(func_num_args()===1){$x=self::enc(1,$s);}else{$x=self::enc(1,func_get_args());}
-		fwrite($this->h,$x);
+		self::w_($this->h, $x);
 		return $this->kr();
 	}
 	public function ka($s) {
 		if(func_num_args()===1){$x=self::enc(1,$s);}else{$x=self::enc(1,func_get_args());}
-		fwrite($this->h,$x);
+		self::w_($this->h, $x);
 	}
 	private function rd($n,&$nb){
 		if(isset($nb)){$r=strlen($nb);if($r>=$n){$x=substr($nb,0,$n);$nb=substr($nb,$n,$r-$n);return $x;}}else{$r=0;}
