@@ -15,7 +15,7 @@ Can also create symbols with `K::S()` e.g.
 
     class Receiver {
       public function ks($a, $x=null, $y=null, $z=null) {} // called for async
-      public function k($a , $x=null, $y=null, $z=null) {return K::S("table")} // called for sync
+      public function k($a , $x=null, $y=null, $z=null) {return K::S("table");} // called for sync
     };
     K::server_loop(1234, new Receiver());
 
