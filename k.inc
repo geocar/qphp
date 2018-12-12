@@ -124,7 +124,7 @@ class K {
 	public function kr(&$b=null) {
 		if(false===($s=$this->rd(8,$this->b)))return $s;$a=unpack("l2", $s);
 		if(isset($b))$b=$a;$r=$a[2]-8;if($r<=0)return null;//hup.
-		$ob=$this->b;if(false===($g=$this->rd($r,$this->b))){$this->b=$s.$ob;return $g;}
+		if(false===($g=$this->rd($r,$this->b))){$this->b=$s.$this->b;return $g;}
 		return self::dec(new KScan($g));
 	}
 
